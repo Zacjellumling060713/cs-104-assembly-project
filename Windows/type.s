@@ -46,7 +46,9 @@ main:				# Start of the main function
 	# Let's start by checking to see if we have 2 arguments
 	# The number of arguments we have lives in register rdi
 	# If we don't have exactly 2 arguments, go to the error function
-
+	cmp rdi, 2
+	jne error
+	mov rsi, 0
 	mov	rdi, [rsi + 8]	# Get file name to open
 
 	# The line above puts the file name in the first argument
@@ -58,16 +60,25 @@ main:				# Start of the main function
 	mov	rax, 2		# Put 2 (open) into function number
 	syscall			# Call open with 2 arguments
 
+	cmp rax, 0
+	jl error
+
 	# Here, we need to check the number that the open
 	# function gives back to us.
 	# If the number is less than 0, we should go to the error functon
 	# Whenever a function gives you back a number, that number will
 	# live in the rax register.
 
+	mov rbx, rax
+	
 	# Now, we should save the number the open function gave back to us
 	# Let's save it to the rbx register (for reasons outside this
 	# class, it needs to be the rbx register; come talk to me
 	# during office hours if you are curious why).
+
+	sub rsp, 1
+	cmp rsp, 0
+	je error
 
 	# The last sub-problem to solve in the main function is to give
 	# ourselves some space to store the letters we read from the file.
@@ -82,10 +93,16 @@ main:				# Start of the main function
 loop:				# Start of the loop function
 	# The loop function is where all the real work happens.
 
+	mov rdi, rbx
+	
 	# The first sub-problem is putting the value we saved to rbx
 	# into the first argument for read.
 
+	mov rsi, rsp
+
 	# Next, we put the value of rsp into the second argument. 
+
+	mov rdx, 1
 
 	# Finally, we put 1 into rdx. The rdx register is always the
 	# third argument for a function.
@@ -93,12 +110,20 @@ loop:				# Start of the loop function
 	mov	rax, 0		# Put 0 (read) into function number
 	syscall			# Call read with 3 arguments
 
+	cmp rax, 0
+	je done
+	jl error
+	
 	# Now we check the number the read function gave back to us
 	# If it is 0, we should go to the done function because it
 	# means we successfully read every character from the file
 	# and put every character on the screen.
 	# If it is less than 0, we should go to the error function
 	# because it means something bad happened.
+
+	mov rdi, 1
+	mov rsi, rsp
+	mov rdx, 1
 
 	# After we read in a letter, we need to put that letter on
 	# the screen.
@@ -109,10 +134,15 @@ loop:				# Start of the loop function
 	mov	rax, 1		# Put 1 (write) into function number
 	syscall			# Call write with 3 arguments
 
+	cmp rax, 1
+	jne error
+
 	# Now we need to check to see if the number we got back from
 	# the write function is 1. If it is not equal to 1, then we
 	# should go to the error function because it means something
 	# bad happened.
+
+	jmp loop
 
 	# Last sub-problem for the loop function: if we got all the
 	# way here, it means everything was successful for this
@@ -120,6 +150,9 @@ loop:				# Start of the loop function
 	# function so we can do it all again with the next letter.
 
 done:				# Start of the done function
+
+	mov rdi, 0
+	
 	# Here, put 0 into the first argument
 	# If a program exits with 0, that means it was successful
 

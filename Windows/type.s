@@ -48,8 +48,8 @@ main:				# Start of the main function
 	# If we don't have exactly 2 arguments, go to the error function
 	cmp rdi, 2
 	jne error
-	mov rsi, 0
 	mov	rdi, [rsi + 8]	# Get file name to open
+	mov rsi, 0
 
 	# The line above puts the file name in the first argument
 	# The rdi register always holds the first argument for a function
@@ -77,9 +77,7 @@ main:				# Start of the main function
 	# during office hours if you are curious why).
 
 	sub rsp, 1
-	cmp rsp, 0
-	je error
-
+	
 	# The last sub-problem to solve in the main function is to give
 	# ourselves some space to store the letters we read from the file.
 	# We will use rsp for this. Remember that when our program starts,
